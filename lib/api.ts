@@ -2,8 +2,7 @@
 import axios from "axios";
 
 // Your backend URL
-const API_URL = "http://localhost:8000";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://plutonity-backend-production.up.railway.app";
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: API_URL,
