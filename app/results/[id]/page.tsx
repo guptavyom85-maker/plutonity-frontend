@@ -15,15 +15,11 @@ export default function Results() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   useEffect(() => {
-    if (!localStorage.getItem("access_token")) {
-      router.push("/login");
-      return;
-    }
-    if (id) {
-      console.log("Using strategy id:", id)  // verify this looks correct
-      fetchResult();
-    }
-  }, [id]);
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    router.push("/login");
+  }
+}, []);
 
   const fetchResult = async () => {
     try {

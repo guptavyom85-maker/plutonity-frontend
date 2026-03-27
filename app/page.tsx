@@ -1,3 +1,5 @@
+"use client";
+  // rest of the code stays exactly the same
 // app/page.tsx
 import Link from "next/link";
 

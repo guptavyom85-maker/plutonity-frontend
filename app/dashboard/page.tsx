@@ -47,10 +47,11 @@ export default function Dashboard() {
 
   // Redirect if not logged in
   useEffect(() => {
-    if (!localStorage.getItem("access_token")) {
-      router.push("/login");
-    }
-  }, []);
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    router.push("/login");
+  }
+}, []);
 
   const handleSubmit = async () => {
     setLoading(true);
