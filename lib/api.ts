@@ -1,6 +1,26 @@
 // lib/api.ts
 import axios from "axios";
+// Add this to lib/api.ts
+import { createClient } from "@supabase/supabase-js";
 
+// Create a Supabase client for the frontend
+// This is separate from your backend's Supabase client
+export const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export const signInWithGoogle = async () => {
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`
+    }
+  });
+
+  if (error) throw error;
+  return data;
+};
 // Your backend URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://plutonity-backend-production.up.railway.app";
 // Create axios instance with base URL
@@ -71,3 +91,4 @@ export const getLeaderboard = async () => {
   const response = await api.get("/leaderboard/");
   return response.data;
 };
+
