@@ -1,32 +1,35 @@
-// app/results/[id]/page.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getBacktestResult } from "@/lib/api";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 export default function Results() {
   const params = useParams();
   const router = useRouter();
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Extract id safely — handle both string and array
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   useEffect(() => {
-  const token = localStorage.getItem("access_token");
-  if (!token) {
-    router.push("/login");
-  }
-}, []);
+    if (!localStorage.getItem("access_token")) {
+      router.push("/login");
+      return;
+    }
+    if (id) fetchResult();
+  }, [id]);
 
   const fetchResult = async () => {
-    try {
+    try{
+      console.log("Fetching result for strategy_id:", id);
       const data = await getBacktestResult(id as string);
+      console.log("Got result:", data);
       setResult(data);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Full error:", err);
+      const msg = err?.response?.data?.detail || err?.message || "Failed to load results";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -35,7 +38,28 @@ export default function Results() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-zinc-400">Loading results...</div>
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="text-zinc-400">Loading results...</div>
+          <div className="text-zinc-600 text-sm mt-2 font-mono">{id}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center max-w-md">
+          <div className="text-red-400 text-lg mb-2">Failed to load results</div>
+          <div className="text-zinc-500 text-sm font-mono bg-zinc-900 p-4 rounded-lg mb-4">{error}</div>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg text-sm transition"
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
       </div>
     );
   }
@@ -43,7 +67,7 @@ export default function Results() {
   if (!result) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-400">Results not found</div>
+        <div className="text-zinc-400">No results found</div>
       </div>
     );
   }
@@ -77,7 +101,6 @@ export default function Results() {
         </button>
       </div>
 
-      {/* Metrics Grid */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {metrics.map((m) => (
           <div key={m.label} className="border border-zinc-800 rounded-xl p-6">
@@ -89,7 +112,6 @@ export default function Results() {
         ))}
       </div>
 
-      {/* Back to leaderboard */}
       <div className="text-center mt-8">
         <button
           onClick={() => router.push("/leaderboard")}
